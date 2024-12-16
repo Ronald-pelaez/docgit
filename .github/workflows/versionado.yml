@@ -14,21 +14,28 @@ jobs:
       id-token: write
 
     steps:
+      # 1. Clonar el repositorio
       - name: Check out repository
         uses: actions/checkout@v4
 
+      # 2. Configurar Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '21'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Install dependencies
-        run: |
-          npm install
+      # 3. Configurar autenticación en npm
+      - name: Authenticate with npm
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
 
+      # 4. Instalar dependencias
+      - name: Install dependencies
+        run: npm install
+
+      # 5. Ejecutar semantic-release
       - name: Run semantic-release
-        run: |
-          npx semantic-release
+        run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
