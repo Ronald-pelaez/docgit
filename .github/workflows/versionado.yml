@@ -20,6 +20,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '21'
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
         run: |
@@ -30,3 +31,4 @@ jobs:
           npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN_GH }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
