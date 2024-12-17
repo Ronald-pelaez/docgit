@@ -6,7 +6,6 @@ const config = {
         '@semantic-release/npm',
         [
             '@semantic-release/changelog',
-
         ],
         [
             '@semantic-release/git',
