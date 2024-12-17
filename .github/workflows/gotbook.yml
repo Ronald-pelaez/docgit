@@ -26,14 +26,24 @@ jobs:
         run: |
           release_data=$(echo '${{ steps.get_release.outputs.result }}' | jq -c '.')
           
-          curl -X POST https://api.gitbook.com/v1/spaces/$GITBOOK_SPACE_ID/content/import \
-            -H "Authorization: Bearer GITBOOK_API_TOKEN" \
+          response=$(curl -v -X POST https://api.gitbook.com/v1/spaces/$GITBOOK_SPACE_ID/content/import \
+            -H "Authorization: Bearer $GITBOOK_API_TOKEN" \
             -H "Content-Type: application/json" \
             -d '{
+              "importedResources": 1,
+              "totalResources": 1,
               "content": {
                 "type": "github_release",
                 "data": '"$release_data"'
               },
               "source": "website",
               "url": "https://github.com/Ronald-pelaez/docgit/blob/main/docs/CHANGELOG.md"
-            }'
+            }')
+          
+          echo "Response: $response"
+          
+          # Check if the response contains an error
+          if echo "$response" | grep -q '"error"'; then
+            echo "Error in API request"
+            exit 1
+          fi
