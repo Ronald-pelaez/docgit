@@ -1,8 +1,9 @@
-name: Sync GitHub Release to GitBook
+name: publicar release en gitbook
 
 on:
-  repository_dispatch:
-    types: [release-published]
+  release:
+    types:
+      - published
 
 jobs:
   sync-to-gitbook:
