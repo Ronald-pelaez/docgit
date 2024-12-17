@@ -5,9 +5,6 @@ const config = {
         '@semantic-release/release-notes-generator',
         '@semantic-release/npm',
         [
-            '@semantic-release/changelog',
-        ],
-        [
             '@semantic-release/git',
             {
                 assets: ['dist/**/*', 'package.json', 'docs/CHANGELOG.md'],
