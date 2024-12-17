@@ -30,8 +30,6 @@ jobs:
             -H "Authorization: Bearer $GITBOOK_API_TOKEN" \
             -H "Content-Type: application/json" \
             -d '{
-              "importedResources": 1,
-              "totalResources": 1,
               "content": {
                 "type": "github_release",
                 "data": '"$release_data"'
