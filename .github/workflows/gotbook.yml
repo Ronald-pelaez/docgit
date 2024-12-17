@@ -14,8 +14,8 @@ jobs:
         with:
           script: |
             const release = await github.rest.repos.getLatestRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo
+              owner: 'Ronald-pelaez',
+              repo: 'docgit'
             });
             return release.data;
 
@@ -30,11 +30,10 @@ jobs:
             -H "Authorization: Bearer GITBOOK_API_TOKEN" \
             -H "Content-Type: application/json" \
             -d '{
-              "revision": "Urjj6dvT7l7QtOXgw7Ft",
-              "importedResources": 1,
-              "totalResources": 1,
               "content": {
                 "type": "github_release",
                 "data": '"$release_data"'
-              }
+              },
+              "source": "website",
+              "url": "https://github.com/Ronald-pelaez/docgit/blob/main/docs/CHANGELOG.md"
             }'
