@@ -18,6 +18,9 @@ jobs:
               repo: 'docgit'
             });
             return release.data;
+      - name: Copiar Changelog.md
+        run: co CHANGELOG.md ./output/
+
 
       - name: Sync Release to GitBook
         env:
