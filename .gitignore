@@ -1,3 +1,16 @@
-.idea
+# Ignorar la carpeta de dependencias
 node_modules/
-changelog.md
+
+# Ignorar archivos generados por el proceso de build
+dist/
+build/
+
+# Ignorar la carpeta de configuración de IDE (si estás usando IntelliJ IDEA, PhpStorm, etc.)
+.idea/
+
+# Ignorar los archivos generados por la herramienta de semantic-release
+.release/
+
+# Ignorar cualquier otro archivo temporal
+*.log
+*.tmp
