@@ -36,6 +36,7 @@ jobs:
           # 2. Extraer información relevante
           TAG_NAME=$(echo "$RELEASE_DATA" | jq -r '.tag_name')
           BODY=$(echo "$RELEASE_DATA" | jq -r '.body')
+          RELEASE_URL=$(echo "$RELEASE_DATA" | jq -r '.html_url')
           
           # 3. Crear contenido en formato Markdown
           MARKDOWN_CONTENT="# Release $TAG_NAME\n\n$BODY"
@@ -44,12 +45,16 @@ jobs:
           GITBOOK_PAYLOAD=$(jq -n \
           --arg title "$TAG_NAME" \
           --arg content "$MARKDOWN_CONTENT" \
+          --arg source "GitHub" \
+          --arg url "$RELEASE_URL" \
           '{
             "content": {
               "type": "markdown",
               "data": {
                 "title": $title,
-                "body": $content
+                "body": $content,
+                "source": $source,
+                "url": $url
               }
             }
           }')
