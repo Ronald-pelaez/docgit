@@ -12,14 +12,6 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Get release data
-        id: release
-        run: |
-          RELEASE_DATA=$(curl -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/releases/latest")
-          echo "RELEASE_DATA=$RELEASE_DATA" >> $GITHUB_ENV
-
       - name: Send to GitBook
         run: |
           curl -X POST "https://api.gitbook.com/v1/spaces/${{ secrets.GITBOOK_SPACE_ID }}/content/import" \
@@ -30,9 +22,9 @@ jobs:
             "totalResources": 1,
             "content": {
               "type": "github_release",
-              "data": '"$RELEASE_DATA"'
-            },
-            "source": "api"
+              "data": {
+                "source": "website",
+                "url": "https://github.com/${{ github.repository }}/releases/tag/${{ github.event.release.tag_name }}"
+              }
+            }
           }'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
