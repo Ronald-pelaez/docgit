@@ -14,42 +14,43 @@ jobs:
 
       - name: Process and Publish to GitBook
         run: |
-          # 1. Obtener datos del release de GitHub
+          # 1. Construir la URL de la API
+          API_URL="https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ github.event.release.tag_name }}"
+          
+          # 2. Obtener datos del release de GitHub
           RELEASE_DATA=$(curl -sSL \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ github.event.release.tag_name }}")
+            "$API_URL")
           
           echo "Release data from GitHub:"
           echo "$RELEASE_DATA"
           
-          # 2. Formatear datos para GitBook
-          GITBOOK_DATA=$(echo "$RELEASE_DATA" | jq -r '{
-            tag_name: .tag_name,
-            name: .name,
-            body: .body,
-            published_at: .published_at,
-            author: .author.login,
-            assets: .assets
-          }')
-          
-          echo "Formatted data for GitBook:"
-          echo "$GITBOOK_DATA"
-          
-          # 3. Enviar a GitBook
-          response=$(curl -v -X POST \
-            "https://api.gitbook.com/v1/spaces/${{ secrets.GITBOOK_SPACE_ID }}/content/import" \
-            -H "Authorization: Bearer ${{ secrets.GITBOOK_API_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{
+          # 3. Crear el payload para GitBook usando la URL de la API
+          GITBOOK_PAYLOAD=$(jq -n \
+            --argjson release "$RELEASE_DATA" \
+            --arg api_url "$API_URL" \
+            '{
+              "url": $api_url,
+              "source": "website",
               "importedResources": 1,
               "totalResources": 1,
               "content": {
                 "type": "github_release",
-                "data": '"$GITBOOK_DATA"'
+                "data": $release
               }
             }')
+          
+          echo "Payload for GitBook:"
+          echo "$GITBOOK_PAYLOAD"
+          
+          # 4. Enviar a GitBook
+          response=$(curl -v -X POST \
+            "https://api.gitbook.com/v1/spaces/${{ secrets.GITBOOK_SPACE_ID }}/content/import" \
+            -H "Authorization: Bearer ${{ secrets.GITBOOK_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "$GITBOOK_PAYLOAD")
           
           echo "GitBook API Response:"
           echo "$response"
