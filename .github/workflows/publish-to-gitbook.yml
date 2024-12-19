@@ -2,51 +2,58 @@ name: Publish to GitBook
 
 on:
   release:
-    types:
-      - created
-      - published
-
-permissions:
-  contents: read
-  actions: read
+    types: [published]
 
 jobs:
   publish:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Debug Event
-        run: |
-          echo "Event name: ${{ github.event_name }}"
-          echo "Event action: ${{ github.event.action }}"
-          echo "Release tag: ${{ github.event.release.tag_name }}"
-          
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Get latest release
-        id: get_release
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '21'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Process and Publish to GitBook
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITBOOK_API_TOKEN: ${{ secrets.GITBOOK_API_TOKEN }}
+          GITBOOK_SPACE_ID: ${{ secrets.GITBOOK_SPACE_ID }}
         run: |
-          RELEASE_TAG=$(curl -s \
+          # 1. Obtener datos del release
+          RELEASE_DATA=$(curl -sSL \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/releases/latest" | \
-            jq -r '.tag_name')
-          echo "::set-output name=tag::$RELEASE_TAG"
-
-          CHANGELOG_URL="https://raw.githubusercontent.com/${{ github.repository }}/${{ steps.get_release.outputs.tag }}/CHANGELOG.md"
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ github.event.release.tag_name }}")
+          
+          # 2. Extraer información relevante
+          TAG_NAME=$(echo "$RELEASE_DATA" | jq -r '.tag_name')
+          BODY=$(echo "$RELEASE_DATA" | jq -r '.body')
+          
+          # 3. Crear contenido en formato Markdown
+          MARKDOWN_CONTENT="# Release $TAG_NAME\n\n$BODY"
+          
+          # 4. Crear payload para GitBook
           GITBOOK_PAYLOAD=$(jq -n \
-            --arg title "${{ steps.get_release.outputs.tag }}" \
-            --arg url "$CHANGELOG_URL" \
-            '{
-              "source": "markdown",
-              "url": $url,
-              "title": $title
-            }')
+          --arg title "$TAG_NAME" \
+          --arg content "$MARKDOWN_CONTENT" \
+          '{
+            "source": "markdown",
+            "content": $content,
+            "title": $title
+          }')
           
           echo "Payload for GitBook:"
           echo "$GITBOOK_PAYLOAD"
           
+          # 5. Enviar a GitBook
           response=$(curl -s -X POST \
             "https://api.gitbook.com/v1/spaces/${{ secrets.GITBOOK_SPACE_ID }}/content/import" \
             -H "Authorization: Bearer ${{ secrets.GITBOOK_API_TOKEN }}" \
