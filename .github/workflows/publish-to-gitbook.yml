@@ -10,12 +10,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '21'
+          node-version: '14'
 
       - name: Install dependencies
         run: npm install
@@ -44,19 +44,14 @@ jobs:
           # 4. Crear payload para GitBook
           GITBOOK_PAYLOAD=$(jq -n \
           --arg title "$TAG_NAME" \
-          --arg content "$MARKDOWN_CONTENT" \
-          --arg source "GitHub" \
+          --arg body "$MARKDOWN_CONTENT" \
+          --arg source "Release Notes" \
           --arg url "$RELEASE_URL" \
           '{
-            "content": {
-              "type": "markdown",
-              "data": {
-                "title": $title,
-                "body": $content,
-                "source": $source,
-                "url": $url
-              }
-            }
+            "title": $title,
+            "body": $body,
+            "source": $source,
+            "url": $url
           }')
           
           echo "Payload for GitBook:"
