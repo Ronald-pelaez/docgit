@@ -1,18 +1,30 @@
-name: Publish Release to GitBook
+name: Publish to GitBook
 
 on:
   release:
     types: [published]
 
 jobs:
-  publish-to-gitbook:
+  publish:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: npm install
 
       - name: Process and Publish to GitBook
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITBOOK_API_TOKEN: ${{ secrets.GITBOOK_API_TOKEN }}
+          GITBOOK_SPACE_ID: ${{ secrets.GITBOOK_SPACE_ID }}
         run: |
           # 1. Obtener datos del release
           RELEASE_DATA=$(curl -sSL \
@@ -26,26 +38,21 @@ jobs:
           BODY=$(echo "$RELEASE_DATA" | jq -r '.body')
           
           # 3. Crear contenido en formato Markdown
-          MARKDOWN_CONTENT=$(cat << EOF
-# Release $TAG_NAME
-
-  $BODY
-  EOF
-  )
-  
-  # 4. Crear payload para GitBook
-  GITBOOK_PAYLOAD=$(jq -n \
-  --arg title "$TAG_NAME" \
-  --arg content "$MARKDOWN_CONTENT" \
-  '{
-"content": {
-  "type": "markdown",
-  "data": {
-    "title": $title,
-    "body": $content
-  }
-}
-}')
+          MARKDOWN_CONTENT="# Release $TAG_NAME\n\n$BODY"
+          
+          # 4. Crear payload para GitBook
+          GITBOOK_PAYLOAD=$(jq -n \
+          --arg title "$TAG_NAME" \
+          --arg content "$MARKDOWN_CONTENT" \
+          '{
+            "content": {
+              "type": "markdown",
+              "data": {
+                "title": $title,
+                "body": $content
+              }
+            }
+          }')
           
           echo "Payload for GitBook:"
           echo "$GITBOOK_PAYLOAD"
@@ -61,6 +68,6 @@ jobs:
           echo "$response"
           
           if echo "$response" | jq -e '.error' > /dev/null; then
-echo "Error in GitBook API request: $response"
-  exit 1
-  fi
+            echo "Error in GitBook API request: $response"
+            exit 1
+          fi
