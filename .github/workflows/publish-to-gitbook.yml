@@ -38,7 +38,7 @@ jobs:
           BODY=$(echo "$RELEASE_DATA" | jq -r '.body')
           
           # 3. Crear contenido en formato Markdown
-          MARKDOWN_CONTENT="# Release $TAG_NAME\n\n$BODY"
+          MARKDOWN_CONTENT="https://raw.githubusercontent.com/${{ github.repository }}/${{ github.event.release.tag_name }}/CHANGELOG.md"
           
           # 4. Crear payload para GitBook
           GITBOOK_PAYLOAD=$(jq -n \
