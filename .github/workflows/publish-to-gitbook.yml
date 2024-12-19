@@ -1,17 +1,26 @@
 name: Publish to GitBook
 
 on:
-  workflow_run:
-    workflows: ["Semantic Release"]
+  release:
     types:
-      - completed
+      - created
+      - published
+
+permissions:
+  contents: read
+  actions: read
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
+      - name: Debug Event
+        run: |
+          echo "Event name: ${{ github.event_name }}"
+          echo "Event action: ${{ github.event.action }}"
+          echo "Release tag: ${{ github.event.release.tag_name }}"
+          
       - name: Checkout repository
         uses: actions/checkout@v2
 
