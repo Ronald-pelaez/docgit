@@ -27,7 +27,10 @@ jobs:
           RELEASE_BODY=$(echo "$RELEASE_INFO" | jq -r '.body')
           RELEASE_NAME=$(echo "$RELEASE_INFO" | jq -r '.name')
           
+          #debugeo
           echo "$RELEASE_TAG"
+          echo "$RELEASE_RELEASE_BODY"
+          echo "$RELEASE_NAME"
           
           # Crear el contenido en formato Markdown
           CONTENT=$(cat << EOF
