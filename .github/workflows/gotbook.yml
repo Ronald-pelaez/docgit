@@ -45,7 +45,7 @@ jobs:
                 "data": '"$release_data"'
               },
               "source": "website",
-              "url": "https://github.com/Ronald-pelaez/docgit/blob/main/docs/CHANGELOG.md"
+              "url": "https://github.com/Ronald-pelaez/docgit/releases"
             }')
           
           echo "Response: $response"
