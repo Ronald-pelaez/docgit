@@ -1,9 +1,9 @@
 name: publicar release en gitbook
 
-on:
-  release:
-    types:
-      - published
+#on:
+ # release:
+ #   types:
+   #  - published
 
 jobs:
   sync-to-gitbook:
