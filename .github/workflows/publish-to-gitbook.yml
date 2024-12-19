@@ -12,24 +12,16 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Get Release Info
-        id: get_release
+      - name: Get Release URL and Create Payload
+        id: create_payload
         run: |
-          RELEASE_JSON=$(curl -sSL \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ github.event.release.tag_name }}")
-          
-          # Format JSON for GitBook
-          GITBOOK_PAYLOAD=$(echo '{
-            "importedResources": 1,
-            "totalResources": 1,
-            "content": {
-              "type": "github_release",
-              "data": '"$RELEASE_JSON"'
-            }
-          }' | jq -c '.')
+          # Crear el payload con el formato exacto que requiere GitBook
+          GITBOOK_PAYLOAD=$(jq -n \
+            --arg url "https://github.com/${{ github.repository }}/releases/tag/${{ github.event.release.tag_name }}" \
+            '{
+              "url": $url,
+              "source": "website"
+            }')
           
           echo "GITBOOK_PAYLOAD<<EOF" >> $GITHUB_ENV
           echo "$GITBOOK_PAYLOAD" >> $GITHUB_ENV
