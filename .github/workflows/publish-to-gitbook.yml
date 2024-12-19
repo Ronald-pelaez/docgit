@@ -46,7 +46,7 @@ jobs:
           --arg content "$MARKDOWN_CONTENT" \
           '{
             "source": "markdown",
-            "url": "$content",
+            "url": $content,
             "title": $title
           }')
           
