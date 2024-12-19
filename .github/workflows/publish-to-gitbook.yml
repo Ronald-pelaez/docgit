@@ -58,8 +58,6 @@ jobs:
           echo "$GITBOOK_PAYLOAD" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
-      - name: Publish to GitBook
-        run: |
           response=$(curl -s -X POST \
             "https://api.gitbook.com/v1/spaces/${{ secrets.GITBOOK_SPACE_ID }}/content/import" \
             -H "Authorization: Bearer ${{ secrets.GITBOOK_API_TOKEN }}" \
